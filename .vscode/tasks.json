@@ -1,0 +1,38 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Rust: test clock",
+      "type": "shell",
+      "command": "cargo test -p sim-core",
+      "problemMatcher": []
+    },
+    {
+      "label": "Web: build WASM",
+      "type": "shell",
+      "command": "npm run build:wasm",
+      "problemMatcher": []
+    },
+    {
+      "label": "Web: dev server",
+      "type": "shell",
+      "command": "npm --workspace @dronedar/web run dev",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": [{"regexp": "."}],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "VITE",
+          "endsPattern": "Local:"
+        }
+      }
+    },
+    {
+      "label": "Web: browser tests",
+      "type": "shell",
+      "command": "npm run test:foundation-browser-flow",
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Rust deterministic clock tests",
+      "type": "lldb",
+      "request": "launch",
+      "cargo": {
+        "args": ["test", "-p", "sim-core", "--no-run"],
+        "filter": {"name": "sim_core", "kind": "lib"}
+      },
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Chromium: main thread and worker TypeScript",
+      "type": "pwa-chrome",
+      "request": "launch",
+      "url": "http://127.0.0.1:4173",
+      "webRoot": "${workspaceFolder}/apps/web",
+      "preLaunchTask": "Web: dev server"
+    }
+  ]
+}

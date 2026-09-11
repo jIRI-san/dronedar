@@ -1,0 +1,32 @@
+{
+  "name": "dronedar",
+  "private": true,
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=22.16.0",
+    "npm": ">=10.9.2"
+  },
+  "workspaces": ["apps/web"],
+  "scripts": {
+    "format:rust": "cargo fmt --all -- --check",
+    "lint:rust": "cargo clippy --workspace --all-targets -- -D warnings",
+    "test:rust": "cargo test --workspace",
+    "test:toy-clock-determinism": "cargo test -p sim-core",
+    "test:protocol-invalid-input": "cargo test -p sim-protocol -p sim-wasm",
+    "protocol:generate": "cargo run -p sim-protocol --bin generate-types -- apps/web/src/generated/protocol.ts",
+    "protocol:check": "npm run protocol:generate && git diff --exit-code -- apps/web/src/generated/protocol.ts",
+    "test:protocol-contract-sync": "npm run protocol:check",
+    "build:wasm": "wasm-pack build crates/sim-wasm --target web --out-dir ../../apps/web/src/wasm/pkg --out-name sim_wasm",
+    "dev": "npm --workspace @dronedar/web run dev",
+    "typecheck": "npm --workspace @dronedar/web run typecheck",
+    "test:web": "npm --workspace @dronedar/web run test",
+    "test:worker-boundary": "npm --workspace @dronedar/web run test -- simulation-client.test.ts",
+    "test:worker-scheduler": "npm --workspace @dronedar/web run test -- worker-runtime.test.ts",
+    "build:web": "npm run build:wasm && npm --workspace @dronedar/web run build",
+    "test:foundation-browser-flow": "npm run build:wasm && playwright test -c apps/web/playwright.config.ts",
+    "test:exercise-pack-contract": "node scripts/check-exercise-pack.mjs",
+    "test:workspace-clean-build": "npm ci && npm run format:rust && npm run lint:rust && npm run test:rust && npm run protocol:check && npm run build:web",
+    "quality": "npm run format:rust && npm run lint:rust && npm run test:rust && npm run typecheck && npm run test:web && npm run protocol:check && npm run test:exercise-pack-contract && npm run build:web && npm run test:foundation-browser-flow",
+    "test:quality-gates": "npm run quality"
+  }
+}

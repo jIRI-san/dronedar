@@ -1,0 +1,10 @@
+/node_modules/
+/apps/web/node_modules/
+/apps/web/test-results/
+/crates/sim-protocol/bindings/
+/apps/web/dist/
+/apps/web/src/wasm/pkg/
+/playwright-report/
+/test-results/
+/target/
+.DS_Store

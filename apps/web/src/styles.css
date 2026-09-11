@@ -1,0 +1,51 @@
+:root {
+  color: #e7edf5;
+  background: #101722;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: minmax(18rem, 28rem) minmax(20rem, 1fr);
+  min-height: 100vh;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+section,
+details {
+  background: #1b2635;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+canvas {
+  display: block;
+  height: min(70vh, 38rem);
+  width: 100%;
+}
+
+button {
+  margin: 0.25rem;
+  padding: 0.5rem 0.8rem;
+}
+
+pre {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.error {
+  color: #ffb4ab;
+}
+
+@media (max-width: 48rem) {
+  main {
+    grid-template-columns: 1fr;
+  }
+}

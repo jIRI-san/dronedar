@@ -28,7 +28,7 @@ A subfolder is created only when a concern needs more than one file (`assets/dec
 ## Phase 1: Establish the typed Rust foundation
 <!-- worktree: (recorded by /ci when worktree is created) -->
 
-- [ ] 1.1 Scaffold the locally reproducible workspace (REQ-1, REQ-6, RISK-1, RISK-5) `M`
+- [x] 1.1 Scaffold the locally reproducible workspace (REQ-1, REQ-6, RISK-1, RISK-5) `M`
   <details><summary>Implementation contract</summary>
 
   **Outcome:** a Rust workspace and npm workspace install from committed manifests and lockfiles on the
@@ -51,7 +51,7 @@ A subfolder is created only when a concern needs more than one file (`assets/dec
 
   </details>
 
-- [ ] 1.2 Implement the deterministic clock and Rust-owned protocol (REQ-2, REQ-3, RISK-2, RISK-4) [after: 1.1] `M`
+- [x] 1.2 Implement the deterministic clock and Rust-owned protocol (REQ-2, REQ-3, RISK-2, RISK-4) [after: 1.1] `M`
   <details><summary>Implementation contract</summary>
 
   **Outcome:** platform-neutral Rust state transitions implement pause, resume, one-tick step, reset, and
@@ -74,7 +74,7 @@ A subfolder is created only when a concern needs more than one file (`assets/dec
 
   </details>
 
-- [ ] 1.3 Generate and check TypeScript protocol declarations (REQ-3, REQ-6, RISK-2, RISK-5) [after: 1.2] `S`
+- [x] 1.3 Generate and check TypeScript protocol declarations (REQ-3, REQ-6, RISK-2, RISK-5) [after: 1.2] `S`
   <details><summary>Implementation contract</summary>
 
   **Outcome:** committed TypeScript declarations are generated from the Rust protocol definitions, and a
@@ -96,7 +96,7 @@ A subfolder is created only when a concern needs more than one file (`assets/dec
 ## Phase 2: Complete the browser vertical slice
 <!-- worktree: (recorded by /ci when worktree is created) -->
 
-- [ ] 2.1 Expose the core through WASM in a lifecycle-aware worker (REQ-3, REQ-4, RISK-1, RISK-3) [after: 1.3] `M`
+- [x] 2.1 Expose the core through WASM in a lifecycle-aware worker (REQ-3, REQ-4, RISK-1, RISK-3) [after: 1.3] `M`
   <details><summary>Implementation contract</summary>
 
   **Outcome:** a thin `wasm-bindgen` adapter accepts and returns application-protocol JSON, while a module
@@ -122,7 +122,7 @@ A subfolder is created only when a concern needs more than one file (`assets/dec
 
   </details>
 
-- [ ] 2.2 Build the minimal Babylon.js control surface (REQ-4, REQ-5, RISK-3, RISK-4) [after: 2.1] `M`
+- [x] 2.2 Build the minimal Babylon.js control surface (REQ-4, REQ-5, RISK-3, RISK-4) [after: 2.1] `M`
   <details><summary>Implementation contract</summary>
 
   **Outcome:** a vanilla TypeScript/Vite page displays a live Babylon.js canvas, worker lifecycle,
@@ -143,7 +143,7 @@ A subfolder is created only when a concern needs more than one file (`assets/dec
 
   </details>
 
-- [ ] 2.3 Harden deterministic browser and boundary behavior (REQ-2, REQ-3, REQ-4, REQ-5, RISK-3, RISK-6) [after: 2.2] `M`
+- [x] 2.3 Harden deterministic browser and boundary behavior (REQ-2, REQ-3, REQ-4, REQ-5, RISK-3, RISK-6) [after: 2.2] `M`
   <details><summary>Implementation contract</summary>
 
   **Outcome:** focused unit and browser scenarios cover command-plus-tick replay determinism, timer delay
@@ -166,7 +166,7 @@ A subfolder is created only when a concern needs more than one file (`assets/dec
 ## Phase 3: Teach the foundation interactively
 <!-- worktree: (recorded by /ci when worktree is created) -->
 
-- [ ] 3.1 Write the executable foundation learning chapter (REQ-7, RISK-4, RISK-6) [after: 2.3] `M`
+- [x] 3.1 Write the executable foundation learning chapter (REQ-7, RISK-4, RISK-6) [after: 2.3] `M`
   <details><summary>Implementation contract</summary>
 
   **Outcome:** the first learning chapter explains the architecture and chosen tradeoffs, teaches the Rust
@@ -186,7 +186,7 @@ A subfolder is created only when a concern needs more than one file (`assets/dec
 
   </details>
 
-- [ ] 3.2 Build the progressive foundation exercise pack (REQ-8, RISK-4, RISK-7) [after: 2.3] `L`
+- [x] 3.2 Build the progressive foundation exercise pack (REQ-8, RISK-4, RISK-7) [after: 2.3] `L`
   <details><summary>Implementation contract</summary>
 
   **Outcome:** 3–6 prerequisite-ordered exercises guide the learner through the clock state machine,
@@ -221,7 +221,7 @@ A subfolder is created only when a concern needs more than one file (`assets/dec
 ## Phase 4: Verify the complete foundation
 <!-- worktree: (recorded by /ci when worktree is created) -->
 
-- [ ] 4.1 Establish the complete local quality gate (REQ-1, REQ-3, REQ-6, REQ-8, RISK-1, RISK-5, RISK-7) [after: 2.3, 3.2] `M`
+- [x] 4.1 Establish the complete local quality gate (REQ-1, REQ-3, REQ-6, REQ-8, RISK-1, RISK-5, RISK-7) [after: 2.3, 3.2] `M`
   <details><summary>Implementation contract</summary>
 
   **Outcome:** documented root commands run Rust formatting, linting, tests, TypeScript type checking and
@@ -241,7 +241,7 @@ A subfolder is created only when a concern needs more than one file (`assets/dec
 
   </details>
 
-- [ ] 4.2 Perform the local release-readiness and learning-material pass (REQ-1, REQ-2, REQ-3, REQ-4, REQ-5, REQ-6, REQ-7, REQ-8, RISK-1, RISK-2, RISK-3, RISK-5, RISK-6, RISK-7) [after: 3.1, 3.2, 4.1] `M`
+- [x] 4.2 Perform the local release-readiness and learning-material pass (REQ-1, REQ-2, REQ-3, REQ-4, REQ-5, REQ-6, REQ-7, REQ-8, RISK-1, RISK-2, RISK-3, RISK-5, RISK-6, RISK-7) [after: 3.1, 3.2, 4.1] `M`
   <details><summary>Implementation contract</summary>
 
   **Outcome:** the foundation is reproducible from documented local setup, all automated evidence passes,
