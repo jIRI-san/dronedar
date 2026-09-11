@@ -10,3 +10,5 @@
   generated TypeScript declarations, local Windows plus Playwright Chromium evidence, and no hosted CI.
 - Repository-wide decision rule:
   [`simplicity-first.design.md`](../../../design-notes/project/simplicity-first.design.md).
+- Repository-wide exercise convention:
+  [`learning-exercises.design.md`](../../../design-notes/project/learning-exercises.design.md).

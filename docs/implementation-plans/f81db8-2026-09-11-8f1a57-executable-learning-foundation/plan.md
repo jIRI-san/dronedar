@@ -1,7 +1,7 @@
 # 8f1a57: Executable learning foundation
 <!-- plan-id: 8f1a57 -->
 <!-- cip-stage: drafted -->
-<!-- planning-confirmed: sha256:18fca3ccbc7dc97713383c3d57f1716750a395a4fce45bde7938c9e7a798352a -->
+<!-- planning-confirmed: sha256:1118bcedd527fccccf23fa22299fc9a76da2c91590b5e5320dc2b976e3e63537 -->
 <!-- epic: f81db8 -->
 <!-- Folder naming: <epic-id|standalone>-<yyyy-mm-dd>-<6hex>-<slug> · plan-id is the canonical handle (date/slug/hash all resolve via Resolve-Plan). New-Plan.ps1 fills these in. -->
 <!-- execution-mode: host-autopilot -->
@@ -55,18 +55,20 @@ A subfolder is created only when a concern needs more than one file (`assets/dec
   <details><summary>Implementation contract</summary>
 
   **Outcome:** platform-neutral Rust state transitions implement pause, resume, one-tick step, reset, and
-  telemetry through a protocol-v1 tagged JSON envelope with protocol version, optional correlation ID,
-  success payloads, and typed errors.
+  injected ticks through a protocol-v1 tagged JSON envelope with protocol version, optional correlation ID,
+  telemetry, and typed errors.
 
   **Likely touchpoints:** `crates/sim-protocol/`, `crates/sim-core/`, Rust unit and integration tests, and
   protocol fixtures.
 
-  **Constraints:** one configured fixed tick is the only unit of simulation progress; invalid JSON,
-  versions, commands, and payloads preserve clock state; no browser, WASM, physics, sensor, or controller
-  concepts enter the core.
+  **Constraints:** initial/reset state is paused; pause/resume are idempotent; step while running is rejected;
+  `tick` and `tick_duration_us` are `u64`, and `simulation_time_us` uses checked multiplication; invalid JSON,
+  versions, commands, payloads, and overflow preserve state; deterministic replay includes commands plus
+  explicit ticks; no browser, WASM, physics, sensor, or controller concepts enter the core.
 
-  **Verify:** deterministic replay, pause/wall-time isolation, one-tick stepping, reset, correlation, and
-  invalid-input tests pass (`test:toy-clock-determinism`, `test:protocol-invalid-input`).
+  **Verify:** deterministic replay, pause/wall-time isolation, idempotency, one-tick stepping, reset,
+  step-while-running, overflow, correlation, and invalid-input tests pass
+  (`test:toy-clock-determinism`, `test:protocol-invalid-input`).
 
   **Stop/escalate when:** the protocol requires browser-specific fields or clock results vary with wall time.
 
@@ -97,18 +99,23 @@ A subfolder is created only when a concern needs more than one file (`assets/dec
 - [ ] 2.1 Expose the core through WASM in a lifecycle-aware worker (REQ-3, REQ-4, RISK-1, RISK-3) [after: 1.3] `M`
   <details><summary>Implementation contract</summary>
 
-  **Outcome:** a thin `wasm-bindgen` adapter accepts and returns protocol JSON, while a module Web Worker
-  owns the WASM instance and reports explicit starting, ready, failed, and stopped lifecycle states.
+  **Outcome:** a thin `wasm-bindgen` adapter accepts and returns application-protocol JSON, while a module
+  Web Worker owns the WASM instance and no-catch-up timer, and a TypeScript transport exposes lifecycle.
 
   **Likely touchpoints:** `crates/sim-wasm/`, generated WASM package integration, the TypeScript worker,
   worker client, and boundary tests.
 
-  **Constraints:** exactly one worker instance owns authoritative clock state; UI callers correlate replies
-  by request ID; initialization failures and pre-ready commands are explicit errors; no simulation state is
-  mirrored as mutable UI authority.
+  **Constraints:** exactly one worker and timer exist; each timer callback queues one tick with no elapsed-
+  time catch-up; commands and ticks serialize in arrival order; pause cancels future timer callbacks but
+  retains queued ordering; UI callers correlate replies by request ID; the client owns starting/stopped, the
+  worker emits ready/failed, and disposal immediately rejects pending requests without draining, removes
+  handlers, terminates worker/timer, ignores late replies, and never restarts implicitly; lifecycle is not
+  part of the Rust schema; no simulation state is mirrored as mutable UI authority.
 
-  **Verify:** worker tests prove lifecycle transitions, request correlation, single authority, and preservation
-  of state after malformed or unsupported requests (`test:worker-boundary`, `test:protocol-invalid-input`).
+  **Verify:** worker tests prove lifecycle ownership, serialized one-tick scheduling, no catch-up, pause
+  cancellation, disposal cleanup, pending rejection, request correlation, single authority, and preservation
+  of state after malformed or unsupported requests (`test:worker-boundary`, `test:worker-scheduler`,
+  `test:protocol-invalid-input`).
 
   **Stop/escalate when:** a correct implementation requires evaluating generated glue on the main thread or
   maintaining a second state machine outside Rust.
@@ -119,25 +126,29 @@ A subfolder is created only when a concern needs more than one file (`assets/dec
   <details><summary>Implementation contract</summary>
 
   **Outcome:** a vanilla TypeScript/Vite page displays a live Babylon.js canvas, worker lifecycle,
-  simulation tick/time, visible errors, and pause/resume/step/reset controls backed only by worker messages.
+  simulation tick/time, visible errors, pause/resume/step/reset controls, and a collapsed learner diagnostics
+  panel backed only by worker messages.
 
   **Likely touchpoints:** `apps/web/src/`, page styles and accessible markup, Babylon.js scene setup, worker
   client integration, and browser test fixtures.
 
   **Constraints:** Babylon.js renders a deliberately minimal scene; UI-derived presentation state never
   crosses back as clock authority; controls expose disabled/loading/error states and do not use arbitrary
-  sleeps to sequence readiness.
+  sleeps to sequence readiness; the diagnostics action sends one unsupported raw envelope through the real
+  worker path and displays request, typed error, correlation, and before/after clock state.
 
-  **Verify:** Playwright Chromium proves startup, pause, exact one-tick step, resume, reset, and a visible
-  protocol-error scenario (`test:foundation-browser-flow`).
+  **Verify:** Playwright Chromium proves startup, pause, exact one-tick step, resume, reset, and the
+  diagnostics panel's correlated protocol error with unchanged clock state
+  (`test:foundation-browser-flow`).
 
   </details>
 
 - [ ] 2.3 Harden deterministic browser and boundary behavior (REQ-2, REQ-3, REQ-4, REQ-5, RISK-3, RISK-6) [after: 2.2] `M`
   <details><summary>Implementation contract</summary>
 
-  **Outcome:** focused unit and browser scenarios cover replay determinism, rapid command sequences,
-  pre-ready interaction, malformed and unsupported messages, worker startup failure, and stable UI recovery.
+  **Outcome:** focused unit and browser scenarios cover command-plus-tick replay determinism, timer delay
+  without catch-up, rapid command sequences, pre-ready interaction, malformed and unsupported messages,
+  worker startup/disposal failure, pending requests, late replies, and stable UI recovery.
 
   **Likely touchpoints:** Rust fixtures, TypeScript/Vitest tests, Playwright tests, and worker test seams.
 
@@ -152,29 +163,10 @@ A subfolder is created only when a concern needs more than one file (`assets/dec
 
   </details>
 
-## Phase 3: Teach and verify the foundation
+## Phase 3: Teach the foundation interactively
 <!-- worktree: (recorded by /ci when worktree is created) -->
 
-- [ ] 3.1 Establish the complete local quality gate (REQ-1, REQ-3, REQ-6, RISK-1, RISK-5) [after: 2.3] `M`
-  <details><summary>Implementation contract</summary>
-
-  **Outcome:** documented root commands run Rust formatting, linting, tests, TypeScript type checking and
-  unit tests, declaration drift checks, production build, and Playwright Chromium tests locally.
-
-  **Likely touchpoints:** root npm scripts, Rust and TypeScript configuration, Playwright configuration,
-  local verification scripts, and setup documentation.
-
-  **Constraints:** commands are non-interactive and Windows-compatible; no GitHub Actions or other hosted CI
-  configuration is added; failures remain visible and preserve the failing tool's exit status.
-
-  **Verify:** the aggregate local verification command passes from lockfile-installed dependencies and each
-  constituent gate can be invoked separately (`test:workspace-clean-build`, `test:quality-gates`).
-
-  **Stop/escalate when:** validation depends on unrecorded global tools, secrets, or hosted runners.
-
-  </details>
-
-- [ ] 3.2 Write the executable foundation learning chapter (REQ-7, RISK-4, RISK-6) [after: 2.3] `M`
+- [ ] 3.1 Write the executable foundation learning chapter (REQ-7, RISK-4, RISK-6) [after: 2.3] `M`
   <details><summary>Implementation contract</summary>
 
   **Outcome:** the first learning chapter explains the architecture and chosen tradeoffs, teaches the Rust
@@ -194,22 +186,80 @@ A subfolder is created only when a concern needs more than one file (`assets/dec
 
   </details>
 
-- [ ] 3.3 Perform the local release-readiness pass (REQ-1, REQ-2, REQ-3, REQ-4, REQ-5, REQ-6, REQ-7, RISK-1, RISK-2, RISK-3, RISK-5, RISK-6) [after: 3.1, 3.2] `M`
+- [ ] 3.2 Build the progressive foundation exercise pack (REQ-8, RISK-4, RISK-7) [after: 2.3] `L`
+  <details><summary>Implementation contract</summary>
+
+  **Outcome:** 3–6 prerequisite-ordered exercises guide the learner through the clock state machine,
+  protocol serialization and errors, generated TypeScript contract, WASM boundary, worker lifecycle, and
+  browser control flow using working code followed by small reversible changes.
+
+  **Likely touchpoints:** the pack index and numbered concept directories under
+  `exercises/01-executable-foundation/`, minimal exercise fixtures, `.vscode/extensions.json`,
+  `.vscode/launch.json`, `.vscode/tasks.json`, an exercise-contract check, and any structured debug logging
+  needed by the real implementation.
+
+  **Constraints:** follow `learning-exercises.design.md`; provide 3–6 exercises covering the six listed
+  concepts, combining adjacent concepts only when the README keeps their goals and observations distinct;
+  use real code instead of copied algorithms; recommend rust-analyzer and CodeLLDB; support native Rust-test
+  and Chromium main-thread/worker TypeScript debugging with source maps; mark Rust-in-WASM breakpoints
+  unsupported unless demonstrated; identify functions/tests and stopping statements rather than line
+  numbers; every modification has an exact reset path; reference prerequisites instead of repeating them.
+
+  **Verify:** run every exercise from its documented start through expected observations and reset; verify
+  named VS Code tasks/launches on the supported local environment; run the exercise-contract check; review
+  completeness and concept ordering
+  (`file:exercises/01-executable-foundation/README.md#exists`,
+  `file:exercises/01-executable-foundation#dircount>=3`, `file:.vscode/extensions.json#exists`,
+  `file:.vscode/launch.json#exists`, `file:.vscode/tasks.json#exists`,
+  `test:exercise-pack-contract`, `review:cr`).
+
+  **Stop/escalate when:** an exercise requires a parallel implementation of production logic, depends on
+  non-portable user breakpoint state, or cannot restore its change deterministically.
+
+  </details>
+
+## Phase 4: Verify the complete foundation
+<!-- worktree: (recorded by /ci when worktree is created) -->
+
+- [ ] 4.1 Establish the complete local quality gate (REQ-1, REQ-3, REQ-6, REQ-8, RISK-1, RISK-5, RISK-7) [after: 2.3, 3.2] `M`
+  <details><summary>Implementation contract</summary>
+
+  **Outcome:** documented root commands run Rust formatting, linting, tests, TypeScript type checking and
+  unit tests, declaration drift and exercise-contract checks, production build, and Playwright Chromium
+  tests locally.
+
+  **Likely touchpoints:** root npm scripts, Rust and TypeScript configuration, Playwright configuration,
+  local verification scripts, and setup documentation.
+
+  **Constraints:** commands are non-interactive and Windows-compatible; no GitHub Actions or other hosted CI
+  configuration is added; failures remain visible and preserve the failing tool's exit status.
+
+  **Verify:** the aggregate local verification command passes from lockfile-installed dependencies and each
+  constituent gate can be invoked separately (`test:workspace-clean-build`, `test:quality-gates`).
+
+  **Stop/escalate when:** validation depends on unrecorded global tools, secrets, or hosted runners.
+
+  </details>
+
+- [ ] 4.2 Perform the local release-readiness and learning-material pass (REQ-1, REQ-2, REQ-3, REQ-4, REQ-5, REQ-6, REQ-7, REQ-8, RISK-1, RISK-2, RISK-3, RISK-5, RISK-6, RISK-7) [after: 3.1, 3.2, 4.1] `M`
   <details><summary>Implementation contract</summary>
 
   **Outcome:** the foundation is reproducible from documented local setup, all automated evidence passes,
-  committed generated declarations match Rust, and the chapter's experiment matches the browser behavior.
+  committed generated declarations match Rust, the chapter's experiment matches browser behavior, and every
+  exercise produces its stated observations and returns to a clean state.
 
   **Likely touchpoints:** the complete change set; only defects discovered by validation should require edits.
 
   **Constraints:** run validation locally on the documented Windows/Chromium baseline; do not add CI as a
   substitute; do not weaken criteria to accommodate failures.
 
-  **Verify:** run the aggregate quality gate, production build, Chromium flow, generation-drift check, and
-  chapter experiment; inspect the repository for unintended generated WASM output
-  (`test:quality-gates`, `test:foundation-browser-flow`, `test:protocol-contract-sync`).
+  **Verify:** run the aggregate quality gate, production build, Chromium flow, generation-drift check,
+  chapter experiment, all exercise start/debug/reset paths, and inspect the repository for unintended
+  generated WASM output (`test:quality-gates`, `test:foundation-browser-flow`,
+  `test:protocol-contract-sync`).
 
   **Stop/escalate when:** any accepted requirement lacks passing evidence, the clean local setup requires an
-  undocumented prerequisite, or fixing validation would change a confirmed protocol/boundary decision.
+  undocumented prerequisite, an exercise does not reset cleanly, or fixing validation would change a
+  confirmed protocol/boundary decision.
 
   </details>

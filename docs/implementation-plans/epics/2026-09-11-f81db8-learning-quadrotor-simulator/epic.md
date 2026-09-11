@@ -7,7 +7,9 @@
 Build a learning-first path from an empty repository to a browser-based quadrotor simulator, a portable
 Rust flight-control core, autonomous waypoint flight, and a bounded first vision-navigation experiment.
 Each child must leave a runnable system and an explanatory chapter that teaches the relevant physics,
-control theory, Rust concepts, architecture, and experimental observations.
+control theory, Rust concepts, architecture, and experimental observations. It must also leave a small,
+progressive exercise pack that guides the learner through debugging and experimenting with the working
+implementation.
 
 ## Child plans
 
@@ -46,6 +48,11 @@ child plan.
   [`simplicity-first.design.md`](../../../design-notes/project/simplicity-first.design.md): use the clearest
   good-enough solution by default, disclose meaningful alternatives and trade-offs, and require evidence
   before adding complexity.
+- Every child follows
+  [`learning-exercises.design.md`](../../../design-notes/project/learning-exercises.design.md): normally
+  3–6 concept-focused exercises, never more than 10, ordered by prerequisite. Exercises first guide
+  observation of working code, then small reversible changes; they name start commands, debug
+  configurations, breakpoint locations, variables/logs to inspect, expected results, and reset steps.
 - Cross-cutting candidates carried into the children are deterministic seeded experiments, explicit SI
   units and coordinate frames, simulation time independent of render time, bounded actuators, visible
   rejection of invalid or non-finite values, reproducible parameter sets, and beginner-friendly Rust

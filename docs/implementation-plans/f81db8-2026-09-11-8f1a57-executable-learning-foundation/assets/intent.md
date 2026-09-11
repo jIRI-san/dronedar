@@ -11,8 +11,8 @@ TypeScript, and Babylon.js can cooperate without coupling simulation time to ren
 
 A reproducible local Windows workspace launches a browser application, advances a deterministic toy
 simulation clock in Rust, and exchanges versioned commands, telemetry, and explicit errors with a
-TypeScript UI. The repository also establishes the learning-chapter structure used by every later
-milestone.
+TypeScript UI. The repository also establishes the learning-chapter and progressive exercise-pack
+structures used by every later milestone.
 
 ## Interface boundaries
 
@@ -33,6 +33,8 @@ This is the root plan. Every later child depends on its build, runtime, message,
 - Invalid protocol versions and malformed values fail visibly rather than being silently accepted.
 - A first learning chapter explains the architecture, WebAssembly boundary, worker model, and foundational
   Rust ownership/borrowing concepts used by the code.
+- A foundation exercise pack guides interactive inspection of the clock, protocol, WASM boundary, worker
+  lifecycle, and UI flow using working code and small reversible changes.
 
 ## Requirement candidates
 
@@ -40,6 +42,8 @@ This is the root plan. Every later child depends on its build, runtime, message,
 - Keep simulation progression independent of browser render cadence.
 - Make protocol and worker failures observable in both the UI and developer diagnostics.
 - Apply the confirmed learning-first documentation invariant to this and every later child.
+- Provide 3–6 prerequisite-ordered exercises with local start commands, debugger guidance, expected
+  observations, and reset steps.
 
 ## Risks
 
@@ -59,4 +63,4 @@ This is the root plan. Every later child depends on its build, runtime, message,
 
 - The integration seam is runnable on the documented local Windows/Chromium baseline, deterministic at the
   toy-clock level, visibly handles invalid input, passes local quality gates, and is taught by a
-  beginner-oriented chapter with a repeatable experiment.
+  beginner-oriented chapter plus a progressive interactive exercise pack.
