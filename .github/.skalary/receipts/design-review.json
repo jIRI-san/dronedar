@@ -1,10 +1,10 @@
 {
   "name": "design-review",
-  "ref": "718147d114e781e36609e34b371fa0d690c3d68d",
+  "ref": "b7609cfed48e03333da48c0c20849826073c986f",
   "sourceIdentity": {
     "identity": "github.com/jiri-san/skalary",
     "kind": "github",
     "version": 1
   },
-  "version": "1.0.83"
+  "version": "1.0.85"
 }
